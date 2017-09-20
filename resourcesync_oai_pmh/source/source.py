@@ -21,6 +21,7 @@ def main():
 
     # ResourceSync server
     parser_a.add_argument('resourcesync-server-hostname', metavar='<resourcesync-server-hostname>', help='hostname of the ResourceSync source server')
+    parser_a.add_argument('source-url', metavar='<resourcesync-source-url>', help='customize the url the other people can access your file')
     parser_a.add_argument('resourcesync-server-document-root', metavar='<resourcesync-server-document-root>', help='document root of the server (pass "apache" for "/var/www/html", or "tomcat" for "/var/lib/tomcat/webapps/default")')
     parser_a.add_argument('--resource-dir', metavar='<path>', help='path to a directory under the document root where <metadata-dir>s will be put for each collection (if unspecified, defaults to "/resourcesync")')
     parser_a.add_argument('--metadata-dir', metavar='<path>', help='path to a directory under the <resource-dir> where generated sitemaps will be put for the specified collection (if unspecified, defaults to <collection-name>)')
@@ -32,6 +33,7 @@ def main():
 
     parser_a.add_argument('strategy', metavar='<strategy>', choices=['resourcelist', 'new_changelist', 'inc_changelist'], help='"resourcelist", "new_changelist", or "inc_changelist"')
     parser_a.add_argument('collection-name', metavar='<collection-name>', help='name of the collection of resources to generate capability documents for')
+
 
     ### Subcommand - multiple sitemaps
     parser_b = subparsers.add_parser('multi', description='Generate multiple sitemaps by specifying parameters as rows in a CSV.', help='generate multiple sitemaps')
@@ -75,6 +77,7 @@ def main():
         collection = {}
         collection['collection_name'] = args['collection-name']
         collection['resourcesync_url'] = args['resourcesync-server-hostname']
+        collection['source_url'] = args['source-url']
         collection['strategy'] = args['strategy']
 
         # some logic to set default values
@@ -97,6 +100,7 @@ def main():
                         collection = {}
                         collection['collection_name'] = row['collection-name']
                         collection['resourcesync_url'] = row['resourcesync-server-hostname']
+                        collection['source_url'] = args['source-url']
                         collection['strategy'] = row['strategy']
 
                         # some logic to set default values
@@ -142,7 +146,7 @@ def main():
                                   metadata_dir=collection['metadata_dir'],
                                   description_dir=collection['document_root'],
                                   document_root=collection['document_root'],
-                                  url_prefix='{}/{}'.format(collection['resourcesync_url'], collection['resource_dir']),
+                                  url_prefix='{}/{}'.format(collection['source_url'], collection['resource_dir']),
                                   is_saving_sitemaps=True)
                 rs.execute()
             except Exception as e:
